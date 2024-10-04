@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="a1a62323-3683-4b73-98f9-477e7fe97bd5" name="majles">
+        <fileTransfer rootFolder="/home/masafapi/majless" accessType="SFTP" host="31.214.171.200" port="22" sshConfigId="66fc0a02-33eb-4952-a268-8ffa85803b5f" sshConfig="masafapi@31.214.171.200:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
