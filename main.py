@@ -13,8 +13,6 @@ async def on_startup():
 
 
 
-
-
 app.include_router(router, prefix="/exam")
 
 @app.get("/")

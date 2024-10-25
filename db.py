@@ -5,8 +5,9 @@ from sqlalchemy.ext.declarative import declarative_base
 
 DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
+# for alembic to alert tables
 sync_engine = create_engine("sqlite:///./test.db")
-# Create async engine
+# for application
 engine = create_async_engine(DATABASE_URL, echo=True)
 
 # Async session factory
