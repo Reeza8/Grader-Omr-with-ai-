@@ -2,8 +2,15 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="a1a62323-3683-4b73-98f9-477e7fe97bd5" name="majles">
-        <fileTransfer rootFolder="/home/masafapi/majless" accessType="SFTP" host="31.214.171.200" port="22" sshConfigId="66fc0a02-33eb-4952-a268-8ffa85803b5f" sshConfig="masafapi@31.214.171.200:22 password">
+      <webServer id="319d5285-7691-4e33-bdb4-4830a9d3c4fa" name="majles">
+        <fileTransfer rootFolder="/home/masafapi" accessType="SFTP" host="31.214.171.200" port="22" sshConfigId="cd60b02c-0289-4982-8e7e-4da82e026bf4" sshConfig="masafapi@31.214.171.200:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="3278d025-de94-4c1c-996a-ecf51cf1ba2f" name="app12">
+        <fileTransfer rootFolder="/home/develop" accessType="SFTP" host="77.238.108.86" port="22" sshConfigId="66fc0a02-33eb-4952-a268-8ffa85803b5f" sshConfig="develop@77.238.108.86:22 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

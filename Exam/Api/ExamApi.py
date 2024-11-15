@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 from Exam.models import Exam
-from Exam.Schema.ExamSchema import ExamCreate, ExamUpdate, ExamOut
+from Exam.Schema.ExamSchema import ExamCreate, ExamUpdate, ExamOut, CorrectSchema
 from db import get_async_session
+from fastapi.responses import JSONResponse
+from starlette.datastructures import FormData
+from utils import correction
 
 router = APIRouter(prefix='/examApi')
 
@@ -50,3 +53,17 @@ async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_se
     await session.delete(exam)
     await session.commit()
     return {"detail": "Exam deleted successfully"}
+
+
+@router.post('/correct/')
+async def correct(request: Request, db: AsyncSession = Depends(get_async_session)):
+    data = await request.form()
+    if len(data) == 0:
+        return JSONResponse("Empty request")
+    data = FormData(data)
+
+    data = CorrectSchema(**data)
+    file_bytes = await data.img.read()
+    score, codes=correction.scan(file_bytes)
+    return JSONResponse(codes)
+

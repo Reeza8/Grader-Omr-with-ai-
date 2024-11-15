@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+from fastapi import UploadFile
 
 class ExamCreate(BaseModel):
     teacher_id: int
@@ -41,3 +42,6 @@ class StudentExamOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+class CorrectSchema(BaseModel):
+    img: UploadFile
