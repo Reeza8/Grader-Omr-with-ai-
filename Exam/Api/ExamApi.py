@@ -14,6 +14,14 @@ router = APIRouter(prefix='/examApi')
 
 @router.post("/addExam", response_model=ExamOut)
 async def create_exam(exam: ExamCreate, session: AsyncSession = Depends(get_async_session)):
+    # Query to check for duplicate exam
+    exam_query = await session.execute(select(Exam).where(Exam.name == exam.name,Exam.teacher_id == exam.teacher_id))
+    existing_exam = exam_query.scalars().first()
+
+    if existing_exam:
+        raise HTTPException(status_code=400, detail="نام آزمون تکراری است")
+
+    # Create the new exam
     new_exam = Exam(**exam.dict())
     session.add(new_exam)
     await session.commit()
@@ -28,14 +36,26 @@ async def get_user_exams(teacher_id: int, session: AsyncSession = Depends(get_as
     return exams
 
 
-@router.put("/editExam/{exam_id}", response_model=ExamOut)
-async def update_exam(exam_id: int, exam_data: ExamUpdate, session: AsyncSession = Depends(get_async_session)):
-    result = await session.execute(select(Exam).where(Exam.id == exam_id))
-    exam = result.scalar_one_or_none()
+@router.put("/editExam/", response_model=ExamOut)
+async def update_exam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_async_session)):
+    # Query to check if the exam with the given ID exists
+    exam_query = await session.execute(
+        select(Exam)
+        .where(Exam.id == exam_update.id)
+    )
+    exam = exam_query.scalar_one_or_none()
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
-    for key, value in exam_data.dict(exclude_unset=True).items():
+    # Query to check if an exam with the same name and teacher_id exists, excluding the current exam ID
+    duplicate_query = await session.execute(select(Exam)
+        .where(Exam.name == exam_update.name, Exam.teacher_id == exam.teacher_id, Exam.id != exam_update.id))
+    duplicate_exam = duplicate_query.scalars().first()
+    if duplicate_exam:
+        raise HTTPException(status_code=400, detail="نام آزمون تکراری است")
+
+    # Update exam details
+    for key, value in exam_update.dict(exclude_unset=True).items():
         setattr(exam, key, value)
 
     await session.commit()
@@ -48,14 +68,14 @@ async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_se
     result = await session.execute(select(Exam).where(Exam.id == exam_id))
     exam = result.scalar_one_or_none()
     if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
     await session.delete(exam)
     await session.commit()
-    return {"detail": "Exam deleted successfully"}
+    return {"detail": "ازمون با موفقیت حذف شد"}
 
 
-@router.post('/correct/')
+@router.get('/correct/')
 async def correct(request: Request, db: AsyncSession = Depends(get_async_session)):
     data = await request.form()
     if len(data) == 0:
@@ -67,3 +87,13 @@ async def correct(request: Request, db: AsyncSession = Depends(get_async_session
     score, codes=correction.scan(file_bytes)
     return JSONResponse(codes)
 
+@router.get('/uploadKey/')
+async def uploadKey(request: Request, db: AsyncSession = Depends(get_async_session)):
+    data = await request.form()
+    if len(data) == 0:
+        return JSONResponse("Empty request")
+    data = FormData(data)
+    data = CorrectSchema(**data)
+    file_bytes = await data.img.read()
+    score, codes=correction.scan(file_bytes)
+    return JSONResponse(codes)

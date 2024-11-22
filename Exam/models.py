@@ -11,12 +11,21 @@ class Exam(Base):
     id = Column(Integer, primary_key=True, index=True)
     teacher_id = Column(Integer, ForeignKey('teacher.id', ondelete='SET NULL'), nullable=True)
     name = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    modified_at = Column(DateTime(timezone=True), onupdate=func.now())
-    has_key = Column(Boolean, default=False)
+    createdAt = Column(DateTime(timezone=True), server_default=func.now())
+    modifiedAt = Column(DateTime(timezone=True), onupdate=func.now())
+    hasKey = Column(Boolean, default=False)
 
     # Define a one-way relationship to Teacher
     teacher = relationship('Teacher', foreign_keys=[teacher_id])
+
+class ExamKey(Base):
+    __tablename__ = 'examKey'
+
+    id = Column(Integer, primary_key=True, index=True)
+    exam_id = Column(Integer, ForeignKey('exam.id', ondelete='CASCADE'), nullable=True)
+    questionNumber = Column(Integer)
+    rightChoice = Column(Integer)
+    exam = relationship('Exam', foreign_keys=[exam_id])
 
 
 class StudentExam(Base):

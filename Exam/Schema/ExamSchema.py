@@ -6,19 +6,20 @@ from fastapi import UploadFile
 class ExamCreate(BaseModel):
     teacher_id: int
     name: str
-    has_key: Optional[bool] = False
+    hasKey: Optional[bool] = False
 
 class ExamUpdate(BaseModel):
+    id : int
     name: Optional[str]
-    has_key: Optional[bool]
+    haskey: Optional[bool] = False
 
 class ExamOut(BaseModel):
     id: int
     teacher_id: int
     name: str
-    created_at: datetime
-    modified_at: Optional[datetime]
-    has_key: bool
+    createdAt: datetime
+    modifiedAt: Optional[datetime]
+    hasKey: bool
 
     class Config:
         orm_mode = True
@@ -44,4 +45,8 @@ class StudentExamOut(BaseModel):
         orm_mode = True
 
 class CorrectSchema(BaseModel):
+    img: UploadFile
+
+class UploadKey(BaseModel):
+    exam_id: int
     img: UploadFile

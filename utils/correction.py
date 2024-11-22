@@ -23,8 +23,6 @@ def getScore(answerBoxes,img):
         pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
-        # cv2.imwrite(f"imgWarpColored{i}.jpg", img)
-        # Convert to grayscale and apply adaptive threshold
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
         imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 5)
 
@@ -103,8 +101,6 @@ def scan(byteImage):
     imgCanny = cv2.Canny(imgGray, 10, 30)  # Apply Canny edge detection
     # Find and draw contours
     contours, _ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    # cv2.drawContours(img1, contours, -1, (0, 255, 0), 5)
-    # cv2.imwrite("imgaaaaaaa.jpg",img1)
     # Filter for rectangular contours
     try:
         answerBoxes, codeBoxes = rectContour2(contours, img)
