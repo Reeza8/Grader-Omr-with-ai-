@@ -1,7 +1,10 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-from fastapi import UploadFile
+from fastapi import UploadFile, Form, File
+
+class addUser(BaseModel):
+    username: str
 
 class ExamCreate(BaseModel):
     teacher_id: int
@@ -46,7 +49,10 @@ class StudentExamOut(BaseModel):
 
 class CorrectSchema(BaseModel):
     img: UploadFile
+    exam_id : int
+    teacher_id: int
 
 class UploadKey(BaseModel):
     exam_id: int
+    teacher_id: int
     img: UploadFile

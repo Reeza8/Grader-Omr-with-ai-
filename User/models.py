@@ -25,7 +25,7 @@ class Teacher(Base):
     # Define a one-way relationship to User
     user = relationship('User', foreign_keys=[id])
 
-# Student class with foreign key to User
+# Student class with foreign key to Useraaa
 class Student(Base):
     __tablename__ = 'student'
 

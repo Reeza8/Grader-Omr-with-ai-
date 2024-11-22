@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
-from Exam.models import Exam
-from Exam.Schema.ExamSchema import ExamCreate, ExamUpdate, ExamOut, CorrectSchema
+from Exam.models import Exam, ExamKey
+from Exam.Schema.ExamSchema import ExamCreate, ExamUpdate, ExamOut, CorrectSchema, UploadKey
 from db import get_async_session
 from fastapi.responses import JSONResponse
 from starlette.datastructures import FormData
 from utils import correction
+
 
 router = APIRouter(prefix='/examApi')
 
@@ -65,8 +66,8 @@ async def update_exam(exam_update: ExamUpdate, session: AsyncSession = Depends(g
 
 @router.delete("/deleteExam/{exam_id}")
 async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_session)):
-    result = await session.execute(select(Exam).where(Exam.id == exam_id))
-    exam = result.scalar_one_or_none()
+    examQuery = await session.execute(select(Exam).where(Exam.id == exam_id))
+    exam = examQuery.scalar_one_or_none()
     if not exam:
         raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
@@ -76,24 +77,49 @@ async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_se
 
 
 @router.get('/correct/')
-async def correct(request: Request, db: AsyncSession = Depends(get_async_session)):
+async def correct(request: Request, session: AsyncSession = Depends(get_async_session)):
     data = await request.form()
     if len(data) == 0:
-        return JSONResponse("Empty request")
+        return JSONResponse("درخواست خالی میباشد")
     data = FormData(data)
-
     data = CorrectSchema(**data)
+    examQuery = await session.execute(select(Exam).where(Exam.id == data.exam_id, Exam.teacher_id == data.teacher_id))
+    exam = examQuery.scalar_one_or_none()
+    if  not exam:
+        raise HTTPException(status_code=404, detail="ازمون یافت نشد")
+    if not exam.hasKey:
+        raise HTTPException(status_code=400, detail="ازمون کلید ندارد")
     file_bytes = await data.img.read()
-    score, codes=correction.scan(file_bytes)
-    return JSONResponse(codes)
 
-@router.get('/uploadKey/')
-async def uploadKey(request: Request, db: AsyncSession = Depends(get_async_session)):
+    score, codes=correction.scan(file_bytes, exam.key)
+
+    return JSONResponse(f"{score} score  ,{codes} codes")
+
+@router.post('/uploadKey/')
+async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_session)):
     data = await request.form()
     if len(data) == 0:
-        return JSONResponse("Empty request")
-    data = FormData(data)
-    data = CorrectSchema(**data)
+        return JSONResponse("درخواست خالی میباشد")
+    data = UploadKey(**data)
     file_bytes = await data.img.read()
-    score, codes=correction.scan(file_bytes)
-    return JSONResponse(codes)
+    key = correction.scanKey(file_bytes)
+    examQuery = await session.execute(select(Exam).where(Exam.id == data.exam_id, Exam.teacher_id == data.teacher_id))
+    exam = examQuery.scalar_one_or_none()
+    if not exam:
+        raise HTTPException(status_code=404, detail="ازمون یافت نشد")
+    exam.key = key
+    exam.hasKey = True
+    await session.commit()
+    await session.refresh(exam)
+
+    for question_number, right_choice in enumerate(key):
+        new_exam_key = ExamKey(
+            exam_id=data.exam_id,
+            questionNumber=question_number,
+            rightChoice=right_choice
+        )
+        session.add(new_exam_key)
+
+    await session.commit()
+    return JSONResponse(key)
+

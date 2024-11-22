@@ -89,7 +89,7 @@ def myCut(img):
         right = right + nextChoice
         copyImg.save(f"./{i}.jpg")
 
-def rectContour2(contours, img):
+def rectContour2(contours, img, justKey=False):
     large_rects = []
     small_rects = []
     c=0
@@ -101,8 +101,8 @@ def rectContour2(contours, img):
     for contour in contours:
         area = cv2.contourArea(contour)
         x, y, w, h = cv2.boundingRect(contour)
-        cv2.drawContours(img1, contour, -1, (0, 255, 0), 1)
-        cv2.imwrite('img1.jpg', img1)
+        # cv2.drawContours(img1, contour, -1, (0, 255, 0), 1)
+        # cv2.imwrite('img1.jpg', img1)
         aspect_ratio = float(w) / h
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 5)
         # cv2.imwrite('img1.jpg', img1)
@@ -114,17 +114,15 @@ def rectContour2(contours, img):
             # cv2.drawContours(img2, contour, -1, (0, 0, 255), 1)
             # cv2.imwrite('img2.jpg', img2)
             large_rects.append(contour)
+            if len(large_rects) == 16 and justKey == True:
+                break
 
         if 0.7 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 700:
-                cv2.drawContours(img2, contour, -1, (0, 255, 0), 1)
-                cv2.imwrite('img2.jpg', img2)
-
-
                 small_rects.append(contour)
 
     if len(large_rects)!=16:
         raise ValueError(f"Questions were not correctly detected. Only {len(large_rects)} question boxes were detected.")
-    if len(small_rects)!=10:
+    if len(small_rects)!=10 and justKey == False :
         raise ValueError(
             f"Student ID position was not detected correctly. Only {len(small_rects)} digits were detected.")
 
@@ -162,7 +160,8 @@ def rectContour2(contours, img):
     large_rects_sorted = [rect for column in columns for rect in column]
 
     # Sort small rectangles by horizontal position (x-axis)
-    small_rects.sort(key=get_bounding_x)
+    if justKey == False:
+        small_rects.sort(key=get_bounding_x)
 
     # Combine sorted large and small rectangles
     # all_rects_sorted = large_rects_sorted + small_rects

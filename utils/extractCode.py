@@ -76,3 +76,18 @@ def getCode(images):
             print(f"Prediction error: {str(e)}")
 
     return result
+
+
+# from onnxruntime.quantization import quantize_dynamic, QuantType
+#
+# # مسیر مدل اصلی
+# onnx_model_path = "model.onnx"
+# # مسیر مدل بهینه‌شده
+# quantized_model_path = "model_quantized.onnx"
+#
+# # اجرای Quantization
+# quantize_dynamic(
+#     model_input=onnx_model_path,              # مدل اصلی
+#     model_output=quantized_model_path,        # مدل بهینه‌شده
+#     weight_type=QuantType.QUInt8              # تبدیل وزن‌ها به نوع INT8
+# )
