@@ -33,4 +33,8 @@ class GetUser(BaseModel):
     studentCode : str
     teacher_id : int
 
+class EditStudent(BaseModel):
+    id: int
+    name : str
+
 
