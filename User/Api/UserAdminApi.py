@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from User.models import Teacher, User
+from User.models import Teacher, User, Student
 from passlib.context import CryptContext
-from sqlalchemy.exc import IntegrityError
 from db import get_async_session
 from User.Schema.UserAdminSchema import *
 
@@ -62,3 +61,28 @@ async def login(loginData: LoginRequest, session: AsyncSession = Depends(get_asy
     # Create a mock token (replace with a real JWT implementation)
 
     return teacher
+
+
+@router.put("/editStudent/", response_model=GetUser)
+async def editStudent(data: EditStudent, session: AsyncSession = Depends(get_async_session)):
+    student_query = await session.execute(
+        select(Student).where(Student.id == data.id)  # اصلاح شده: ارجاع درست به مدل Student
+    )
+    student = student_query.scalars().first()
+    if not student:
+        raise HTTPException(status_code=404, detail="دانش‌آموز پیدا نشد")
+    user_query = await session.execute(
+        select(User).where(User.id == data.id)
+    )
+
+    user = user_query.scalars().first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="دانش‌آموز پیدا نشد")
+
+    user.name = data.name
+    await session.commit()
+    await session.refresh(user)
+
+    student.name = data.name
+    return student
