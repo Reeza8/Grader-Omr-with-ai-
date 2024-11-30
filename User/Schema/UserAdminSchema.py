@@ -27,5 +27,10 @@ class LoginResponse(BaseModel):
     username: str
     # password: str
 
+class GetUser(BaseModel):
+    id: int
+    name : str
+    studentCode : str
+    teacher_id : int
 
 
