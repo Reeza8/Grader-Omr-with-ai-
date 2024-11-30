@@ -1,9 +1,31 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from typing import Optional, Union
+from datetime import datetime
 
-
-class addUser(BaseModel):
+class AddTeacher(BaseModel):
+    email: Optional[EmailStr] = None
+    name: str
     username: str
+    password: str
 
-class UserOperation(BaseModel):
+
+class TeacherOperation(BaseModel):
     id: int
+    email: Optional[EmailStr] = None
     username: str
+    password: str
+
+    class Config:
+        from_attributes = True
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class LoginResponse(BaseModel):
+    id : int
+    username: str
+    # password: str
+
+
+

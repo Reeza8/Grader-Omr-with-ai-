@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+DATABASE_URL = "sqlite+aiosqlite:///./myDb.db"
 
 # for alembic to alert tables
-sync_engine = create_engine("sqlite:///./test.db")
+sync_engine = create_engine("sqlite:///./myDb.db")
 # for application
 engine = create_async_engine(DATABASE_URL, echo=True)
 

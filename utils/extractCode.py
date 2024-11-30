@@ -48,12 +48,11 @@ def getCode(images):
     session = ort.InferenceSession(onnx_model_path, sess_options=options)
     input_name = session.get_inputs()[0].name
     output_name = session.get_outputs()[0].name
-
     kernel = np.ones((3, 3), np.uint8)
     for i, image in enumerate(images):
         # Find connected components
         if i != 0:
-            image = cv2.dilate(image, kernel, iterations=6)
+            image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=8)
 
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(image)
         largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])

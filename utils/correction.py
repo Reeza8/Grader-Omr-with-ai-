@@ -2,7 +2,7 @@ from utils.common import *
 from utils.extractCode import *
 
 heightImg, widthImg = 1500, 1000
-emptyChoiceThreshold = 4000
+emptyChoiceThreshold = 6200
 questions, choices = 10, 4
 
 def getScore(answerBoxes, img, answers):
@@ -85,11 +85,13 @@ def getCodeBox(codeBoxes,img):
         imgThresh = cv2.adaptiveThreshold(cv2.resize(imgWarpGray, high_res_size), 255, cv2.ADAPTIVE_THRESH_MEAN_C,
                                                  cv2.THRESH_BINARY_INV, 51, 5)
         # Black out the border regions
-        margin = 35
-        imgThresh[:margin, :] = 0
-        imgThresh[-margin:, :] = 0
-        imgThresh[:, :margin] = 0
-        imgThresh[:, -margin:] = 0
+        rightMargin = 35
+        topMargin = 80
+
+        imgThresh[:topMargin, :] = 0
+        imgThresh[-topMargin:, :] = 0
+        imgThresh[:, :rightMargin] = 0
+        imgThresh[:, -rightMargin:] = 0
         codes.append(imgThresh)
 
     result = getCode(codes)
@@ -118,7 +120,7 @@ def scan(byteImage, answers):
     print("Incorrect Answers:", incorrect_count)
     print("FINAL SCORE:", score)
     print("code code:", codes)
-    return score,codes
+    return score, correct_count, incorrect_count ,codes
 
 def scanKey(byteImage):
     np_arr = np.frombuffer(byteImage, np.uint8)

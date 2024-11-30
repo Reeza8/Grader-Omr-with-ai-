@@ -29,7 +29,7 @@ class ExamKey(Base):
     exam = relationship('Exam', foreign_keys=[exam_id])
 
 
-class StudentExam(Base):
+class Student_Exam(Base):
     __tablename__ = 'students_exam'
 
     id = Column(Integer, primary_key=True, index=True)

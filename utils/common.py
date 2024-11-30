@@ -22,33 +22,32 @@ def reorder(myPoints):
         myPointsNew[2] = myPoints[np.argmax(diff)]  # [h,0]
         return myPointsNew
     except Exception as e:
-        myPoints = myPoints.reshape((len(myPoints), 2))  # اطمینان از اینکه هر نقطه دارای دو مختصات است
+        myPoints = myPoints.reshape((len(myPoints), 2))
 
-        # حذف نقاط تکراری یا بسیار نزدیک به هم
+        # حذف نقاط تکراری یا نزدیک به هم
         unique_points = []
         for p in myPoints:
-            if not any(np.allclose(p, up, atol=10) for up in unique_points):  # فاصله 10 برای حذف نقاط نزدیک
+            if not any(np.allclose(p, up, atol=10) for up in unique_points):
                 unique_points.append(p)
-
         myPoints = np.array(unique_points)
 
         if len(myPoints) < 4:
             raise ValueError("نقاط کافی برای تعیین مستطیل موجود نیستند.")
 
-        # محاسبه مرکز مستطیل
-        center = getRectangleCenter(myPoints)
+        # مرتب‌سازی نقاط بر اساس X
+        myPoints = myPoints[myPoints[:, 0].argsort()]
 
-        # مرتب‌سازی نقاط بر اساس زاویه نسبت به مرکز
-        def angle_from_center(point):
-            return np.arctan2(point[1] - center[1], point[0] - center[0])
+        # تقسیم به نقاط چپ و راست
+        left_points = myPoints[:2]
+        right_points = myPoints[-2:]
 
-        points_sorted = sorted(myPoints, key=angle_from_center)[:4]
+        # مرتب‌سازی نقاط چپ و راست بر اساس Y
+        left_points = left_points[left_points[:, 1].argsort()]
+        right_points = right_points[right_points[:, 1].argsort()]
 
-        # بازگرداندن نقاط به ترتیب بالا چپ، بالا راست، پایین چپ، پایین راست
-        return np.array(points_sorted).reshape(4, 1, 2)
-
-
-
+        # ترکیب نهایی
+        ordered_points = np.array([left_points[0], right_points[0], left_points[1], right_points[1]], dtype=np.float32)
+        return ordered_points
 
 
 def getCornerPoints(cont):
