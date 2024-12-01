@@ -2,7 +2,7 @@ from utils.common import *
 from utils.extractCode import *
 
 heightImg, widthImg = 1500, 1000
-emptyChoiceThreshold = 6200
+emptyChoiceThreshold = 5800
 questions, choices = 10, 4
 
 def getScore(answerBoxes, img, answers):
@@ -10,7 +10,6 @@ def getScore(answerBoxes, img, answers):
     correct_count = 0
     incorrect_count = 0
     myIndex = []
-
     for i in range(16):
         # Get and reorder corner points for perspective transformation
         biggestPoints = reorder(getCornerPoints(answerBoxes[i]))
@@ -48,6 +47,8 @@ def getScore(answerBoxes, img, answers):
                 myIndex.append(filled_indices[0] + 1)  # ذخیره ایندکس (۱-بیس)
             else:  # اگر هیچ یا بیش از یک گزینه پر شده باشد
                 myIndex.append(-1)  # مقدار -۱ به‌عنوان پاسخ نامعتبر
+
+
         # Compare user answers with the correct answers
 
     for i in range(160):
@@ -58,8 +59,8 @@ def getScore(answerBoxes, img, answers):
         elif myIndex[i] != -1:
             incorrect_count += 1  # Increment incorrect count if the answer is wrong
         temp += 1
-
     # Calculate the final score
+    print(myIndex)
     net_correct = 3 * correct_count - incorrect_count
     score = (net_correct / float(3 * len(answers))) * 100
     return score, correct_count, incorrect_count
@@ -133,6 +134,8 @@ def scanKey(byteImage):
     # Find and draw contours
     contours, _ = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     myIndex = []
+    consecutiveInvalidCouunt = 0
+
     # Filter for rectangular contours
     try:
         answerBoxes, codeBoxes = rectContour2(contours, img, True)
@@ -149,7 +152,7 @@ def scanKey(byteImage):
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 5)
+        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 10)
 
         # Black out the border regions
         margin = 20
@@ -173,8 +176,13 @@ def scanKey(byteImage):
 
             if len(filled_indices) == 1:  # اگر فقط یک گزینه پر شده باشد
                 myIndex.append(int(filled_indices[0] + 1))  # ذخیره ایندکس (۱-بیس)
+                consecutiveInvalidCouunt = 0
             else:  # اگر هیچ یا بیش از یک گزینه پر شده باشد
                 myIndex.append(-1)  # مقدار -۱ به‌عنوان پاسخ نامعتبر
+                consecutiveInvalidCouunt += 1
+                if consecutiveInvalidCouunt > 10:
+                    myIndex = myIndex[:-(consecutiveInvalidCouunt)]
+                    return myIndex
 
         # Store the answers
     return myIndex

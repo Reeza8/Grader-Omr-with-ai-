@@ -143,7 +143,7 @@ async def editExam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_
 
 
 @router.delete("/deleteExam/{exam_id}")
-async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_session)):
+async def deleteExam(exam_id: int, session: AsyncSession = Depends(get_async_session)):
     examQuery = await session.execute(select(Exam).where(Exam.id == exam_id))
     exam = examQuery.scalar_one_or_none()
     if not exam:
@@ -154,7 +154,7 @@ async def delete_exam(exam_id: int, session: AsyncSession = Depends(get_async_se
     return {"detail": "ازمون با موفقیت حذف شد"}
 
 
-@router.get('/correct/')
+@router.get('/correctSheet/')
 async def correct(request: Request, session: AsyncSession = Depends(get_async_session)):
     data = await request.form()
     if len(data) == 0:
@@ -208,16 +208,16 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         newStudentExam = Student_Exam(
             exam_id=data.exam_id,  # مقدار exam_id
             student_id=student.id,  # مقدار student_id
-            score=score,  # مقدار امتیاز
-            correct=correct,  # تعداد جواب‌های صحیح
-            incorrect=incorrect,  # تعداد جواب‌های غلط
-            empty=empty  # تعداد جواب‌های خالی
+            score=score,
+            correct=correct,
+            incorrect=incorrect,
+            empty=empty
         )
         session.add(newStudentExam)
         await session.commit()
         await session.refresh(newStudentExam)
 
-    return JSONResponse(f"{score} score  ,{codes} codes")
+    return JSONResponse({"code" : codes,"score":score, "correct":correct, "incorrect":incorrect, "empty":empty })
 
 
 @router.post('/uploadKey/')
@@ -262,5 +262,4 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     await session.commit()
 
     return GetExamKey.from_orm(exam)
-
 
