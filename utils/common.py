@@ -105,8 +105,7 @@ def rectContour2(contours, img, justKey=False):
         aspect_ratio = float(w) / h
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 5)
         # cv2.imwrite('img1.jpg', img1)
-        # if area <= 300:  # Ignore small contours
-        #     continue
+
 
 
         if 0.5 <= aspect_ratio <= 0.65 and area >= 200:
@@ -116,7 +115,7 @@ def rectContour2(contours, img, justKey=False):
             if len(large_rects) == 16 and justKey == True:
                 break
 
-        if 0.7 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 700:
+        if 0.7 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 750:
                 small_rects.append(contour)
 
     if len(large_rects)!=16:
