@@ -60,7 +60,7 @@ def getScore(answerBoxes, img, answers):
             incorrect_count += 1  # Increment incorrect count if the answer is wrong
         temp += 1
     # Calculate the final score
-    print(myIndex)
+
     net_correct = 3 * correct_count - incorrect_count
     score = (net_correct / float(3 * len(answers))) * 100
     return score, correct_count, incorrect_count
