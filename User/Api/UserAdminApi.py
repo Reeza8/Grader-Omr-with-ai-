@@ -49,7 +49,7 @@ async def login(loginData: LoginRequest, session: AsyncSession = Depends(get_asy
     teacher_query = await session.execute(
         select(Teacher).where(Teacher.username == loginData.username)
     )
-    teacher = teacher_query.scalars_one_or_none(teacher_query)
+    teacher = teacher_query.scalar_one_or_none()
 
     if not teacher:
         raise HTTPException(status_code=404, detail="نام کاربری یافت نشد")
