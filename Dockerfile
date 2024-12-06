@@ -1,18 +1,20 @@
-# انتخاب تصویر پایه
-FROM python:3.12.6-slim
+FROM python:3.12-slim
 
-# تنظیم دایرکتوری کاری
+# نصب کتابخانه‌های مورد نیاز
+RUN apt-get update && \
+    apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0
+
+# تنظیمات دیگر...
 WORKDIR /app
 
-# کپی فایل‌های مورد نیاز
-COPY . /app
+# نصب وابستگی‌ها از requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# نصب وابستگی‌ها
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# کپی کردن سایر فایل‌ها
+COPY . .
 
-# باز کردن پورت
-# EXPOSE 8000
-
-# فرمان اجرا
+# فرمان اجرای اپلیکیشن
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
