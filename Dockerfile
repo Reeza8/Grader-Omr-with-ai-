@@ -1,12 +1,15 @@
 FROM python:3.12-slim
 
 # نصب Bash و کتابخانه‌های مورد نیاز
+
+# نصب ابزارهای مورد نیاز برای کامپایل و کار با PostgreSQL
 RUN apt-get update && \
     apt-get install -y \
-    bash \
+    gcc \
+    libpq-dev \
     libgl1-mesa-glx \
     libglib2.0-0 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    apt-get clean && rm -rf /var/lib/apt/lists/* \
 
 # تنظیم دایرکتوری کاری
 WORKDIR /app
