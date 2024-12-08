@@ -1,12 +1,14 @@
 FROM python:3.12-slim
 
-# نصب کتابخانه‌های مورد نیاز
+# نصب Bash و کتابخانه‌های مورد نیاز
 RUN apt-get update && \
     apt-get install -y \
+    bash \
     libgl1-mesa-glx \
-    libglib2.0-0
+    libglib2.0-0 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# تنظیمات دیگر...
+# تنظیم دایرکتوری کاری
 WORKDIR /app
 
 # نصب وابستگی‌ها از requirements.txt
