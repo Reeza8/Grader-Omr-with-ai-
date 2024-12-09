@@ -49,7 +49,7 @@ async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_sessio
     )
     exam_result = exam_query.first()
     if not exam_result:
-        raise HTTPException(status_code=404, detail="Exam not found")
+        raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
     exam, student_count = exam_result
 
@@ -169,7 +169,7 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     # خواندن داده‌های ورودی
     data = await request.form()
     if not data:
-        return JSONResponse({"پیام": "درخواست خالی می‌باشد"}, status_code=400)
+        return JSONResponse({"detail": "درخواست خالی می‌باشد"}, status_code=400)
 
     data = FormData(data)
     data = CorrectSchema(**data)
@@ -190,8 +190,8 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     except Exception as e:
         return JSONResponse(
             {
-                "پیام": "خطا در پردازش پاسخ‌برگ",
-                "توضیحات": str(e),
+                "detail": "خطا در پردازش پاسخ‌برگ",
+                "message": str(e),
             },
             status_code=400
         )
@@ -260,7 +260,7 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     # خواندن داده‌های ورودی
     data = await request.form()
     if not data:
-        return JSONResponse({"پیام": "درخواست خالی می‌باشد"}, status_code=400)
+        return JSONResponse({"detail": "درخواست خالی می‌باشد"}, status_code=400)
 
     data = UploadKey(**data)
 
@@ -270,8 +270,8 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     except Exception as e:
         return JSONResponse(
             {
-                "پیام": "خطا در پردازش کلید",
-                "توضیحات": str(e),
+                "detail": "خطا در پردازش کلید",
+                "message": str(e),
             },
             status_code=400
         )
