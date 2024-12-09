@@ -1,25 +1,42 @@
-FROM python:3.12-slim
+# مرحله اول: نصب ابزارهای لازم برای ساخت
+FROM python:3.12-slim AS builder
 
-# نصب Bash و کتابخانه‌های مورد نیاز
-
-# نصب ابزارهای مورد نیاز برای کامپایل و کار با PostgreSQL
-RUN apt-get update && \
-    apt-get install -y \
+# نصب ابزارهای ضروری برای ساخت
+RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
     libgl1-mesa-glx \
-    libglib2.0-0 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* \
+    libglib2.0-0 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # تنظیم دایرکتوری کاری
 WORKDIR /app
 
-# نصب وابستگی‌ها از requirements.txt
+# کپی کردن و نصب وابستگی‌ها
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-# کپی کردن سایر فایل‌ها
+# مرحله دوم: ایجاد ایمیج سبک برای اجرای نهایی
+FROM python:3.12-slim AS final
+
+# نصب فقط وابستگی‌های مورد نیاز برای اجرای نهایی
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# تنظیم دایرکتوری کاری
+WORKDIR /app
+
+# کپی وابستگی‌های نصب شده از مرحله اول
+COPY --from=builder /install /usr/local
+
+# کپی فایل‌های پروژه
 COPY . .
+
+
+
 
 # فرمان اجرای اپلیکیشن
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "10"]
