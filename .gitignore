@@ -20,14 +20,12 @@ alembic/
 *.rar
 *.tar
 *.zip
-*.db
 
 # Logs and databases #
 ######################
 *.log
 *.sql
 *.sqlite
-*.db
 
 # OS generated files #
 ######################
@@ -80,31 +78,11 @@ alembic/*.pyc
 *.jpg
 # Logs and databases #
 ######################
-*.log
-*.sql
-*.sqlite
-*.db
+####################
 
-# OS generated files #
-######################
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-*.db
-*.sqlite
-*.sqlite3
-
-# Virtual environment
-venv/
 
 # Python bytecode files
 __pycache_
-*.py[cod]
 
 # Environment variables
 *.env
@@ -112,9 +90,8 @@ __pycache_
 
 *.keras 
 # Alembic cache files
-alembic/*.pyc
 
 .xml
-.onnx
+
 
 alembic/*
