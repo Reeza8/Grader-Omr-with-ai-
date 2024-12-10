@@ -1,17 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import List
+from typing import List, Optional
 from Exam.models import Exam, ExamKey, Student_Exam
 from Exam.Schema.ExamSchema import GetExams, CorrectSchema, UploadKey, ExamCreate, ExamUpdate, GetExamKey, GetExamDetail, StudentDetail, GetExamDetail
 from db import get_async_session
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from starlette.datastructures import FormData
 from utils import correction
 from User.models import User, Student
-from sqlalchemy.orm import joinedload
-
 
 router = APIRouter(prefix='/examApi')
 
@@ -100,21 +98,20 @@ async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_sessio
 
 
 @router.get("/getExams/{teacher_id}", response_model=List[GetExams])
-async def getExams(teacher_id: int, session: AsyncSession = Depends(get_async_session)):
-    # جستجوی آزمون‌ها و تعداد دانش‌آموزان مرتبط به صورت ترکیبی
-    exams_query = await session.execute(
-        select(
-            Exam,
-            func.count(Student_Exam.id).label("student_count")
-        )
-        .join(Student_Exam, Student_Exam.exam_id == Exam.id, isouter=True)
-        .where(Exam.teacher_id == teacher_id)
-        .group_by(Exam.id)
-    )
+async def getExams(teacher_id: int,queryString: Optional[str] = Query(None),session: AsyncSession = Depends(get_async_session)):
+    exams_query = select(
+        Exam,
+        func.count(Student_Exam.id).label("student_count")
+    ).join(Student_Exam, Student_Exam.exam_id == Exam.id, isouter=True)
 
-    exams_with_counts = exams_query.all()
+    if queryString:
+        exams_query = exams_query.where(Exam.name.ilike(f"%{queryString}%"))
 
-    # مقداردهی مقادیر اضافی مانند تعداد سوالات
+    exams_query = exams_query.where(Exam.teacher_id == teacher_id).group_by(Exam.id)
+
+    exams_with_counts = await session.execute(exams_query)
+    exams_with_counts = exams_with_counts.all()
+
     exams = []
     for exam, student_count in exams_with_counts:
         exam.studentCount = student_count
@@ -311,3 +308,8 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     await session.commit()
     return GetExamKey.from_orm(exam)
 
+
+@router.get("/download")
+async def download_exam():
+    pdf_path = "exam sheet.pdf"  # مسیر فایل PDF
+    return FileResponse(pdf_path, media_type='application/pdf', filename="برگه ازمون.pdf")
