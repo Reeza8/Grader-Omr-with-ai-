@@ -118,6 +118,7 @@ def rectContour2(contours, img, justKey=False):
         if 0.7 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 800:
                 small_rects.append(contour)
 
+
     if len(large_rects)!=16:
         raise ValueError(f"Questions were not correctly detected. Only {len(large_rects)} question boxes were detected.")
     if len(small_rects)!=10 and justKey == False :
