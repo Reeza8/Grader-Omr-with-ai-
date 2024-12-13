@@ -166,7 +166,7 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     # خواندن داده‌های ورودی
     data = await request.form()
     if not data:
-        return JSONResponse({"detail": "درخواست خالی می‌باشد"}, status_code=400)
+        raise HTTPException(status_code=400, detail="درخواست خالی می‌باشد")
 
     data = FormData(data)
     data = CorrectSchema(**data)
@@ -185,13 +185,7 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         file_bytes = await data.img.read()
         score, correct, incorrect, codes = correction.scan(file_bytes, exam.key)
     except Exception as e:
-        return JSONResponse(
-            {
-                "detail": "خطا در پردازش پاسخ‌برگ",
-                "message": str(e),
-            },
-            status_code=400
-        )
+        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
 
     # محاسبه تعداد سوالات بدون پاسخ
     empty = len(exam.key) - (correct + incorrect)
@@ -257,7 +251,7 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     # خواندن داده‌های ورودی
     data = await request.form()
     if not data:
-        return JSONResponse({"detail": "درخواست خالی می‌باشد"}, status_code=400)
+        raise HTTPException(status_code=400, detail="درخواست خالی می‌باشد")
 
     data = UploadKey(**data)
 
@@ -265,13 +259,8 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
         file_bytes = await data.img.read()
         key = correction.scanKey(file_bytes)
     except Exception as e:
-        return JSONResponse(
-            {
-                "detail": "خطا در پردازش کلید",
-                "message": str(e),
-            },
-            status_code=400
-        )
+        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
+
 
     # جستجوی آزمون
     exam_query = await session.execute(
@@ -312,4 +301,8 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
 @router.get("/download")
 async def download_exam():
     pdf_path = "exam sheet.pdf"  # مسیر فایل PDF
-    return FileResponse(pdf_path, media_type='application/pdf', filename="برگه ازمون.pdf")
+    try:
+        return FileResponse(pdf_path, media_type='application/pdf', filename="برگه ازمون.pdf")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="امکان دانلود پاسخبرگ نیست", message=str(e))
+
