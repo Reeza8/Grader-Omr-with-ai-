@@ -4,8 +4,8 @@ from User.Api.UserAdminApi import router as UserAdminRouter
 from fastapi import FastAPI, Request
 from User.models import *
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
+from starlette.middleware.base import BaseHTTPMiddleware
 app = FastAPI()
 
 @app.on_event("startup")
@@ -26,6 +26,11 @@ async def pydantic_validation_exception_handler(request, exc: ValidationError):
         fields_with_errors.append({"field_name": field_name, "field_msg": field_msg})
     return JSONResponse(fields_with_errors,status_code=400)
 
+app.add_middleware(
+    BaseHTTPMiddleware,
+    dispatch=app.router,
+    options={"max_receive_size": 10 * 1024 * 1024},
+)
 
 app.include_router(ExamRouter, prefix="/exam")
 app.include_router(UserAdminRouter, prefix="/user")
