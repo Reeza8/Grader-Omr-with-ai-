@@ -4,8 +4,8 @@ from User.Api.UserAdminApi import router as UserAdminRouter
 from fastapi import FastAPI, Request
 from User.models import *
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
-from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.exceptions import RequestValidationError
+
 app = FastAPI()
 
 @app.on_event("startup")
@@ -14,17 +14,31 @@ async def on_startup():
         await conn.run_sync(Base.metadata.create_all)
 
 
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(request, exc: RequestValidationError):
+    # استخراج فیلدهای ارسال نشده
+    missing_fields = [error["loc"][-1] for error in exc.errors() if error["type"] == "missing"]
 
+    # استخراج خطاهای مربوط به طول کوتاه رشته
+    short_fields = [
+        error["loc"][-1] for error in exc.errors() if error["type"] == "string_too_short"
+    ]
 
+    # ساخت پیام "فیلدهای ارسال نشده" و "فیلدهایی که طول کوتاه دارند"
+    if missing_fields:
+        detail_message = f"فیلد های {', '.join(missing_fields)} ارسال نشدند"
+    elif short_fields:
+        detail_message = f"{', '.join(short_fields)} باید حداقل 8 کاراکتر باشد"
+    else:
+        detail_message = "خطا در اعتبارسنجی ورودی‌ها"
 
-@app.exception_handler(ValidationError)
-async def pydantic_validation_exception_handler(request, exc: ValidationError):
-    fields_with_errors = []
-    for error in exc.errors():
-        field_name = error.get("loc")
-        field_msg = error.get("msg")
-        fields_with_errors.append({"field_name": field_name, "field_msg": field_msg})
-    return JSONResponse(fields_with_errors,status_code=400)
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": detail_message,
+            "message": exc.errors(),
+        }
+    )
 
 
 app.include_router(UserAdminRouter, prefix="/user")
@@ -32,6 +46,5 @@ app.include_router(ExamRouter, prefix="/exam")
 
 @app.get("/")
 async def root():
-
-    return {"message": f"Helllaaaaaaaaaao World "}
+    return {"message": f"Holllaaaaaaaaaa World "}
 

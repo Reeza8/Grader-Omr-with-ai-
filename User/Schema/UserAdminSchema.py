@@ -1,13 +1,11 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional, Union
-from datetime import datetime
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
 
 class AddTeacher(BaseModel):
     email: Optional[EmailStr] = None
     name: str
     username: str
-    password: str
-
+    password: str = Field(..., min_length=8, description="رمز عبور باید حداقل 8 کاراکتر باشد")
 
 class TeacherOperation(BaseModel):
     id: int

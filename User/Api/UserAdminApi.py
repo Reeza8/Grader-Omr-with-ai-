@@ -8,11 +8,18 @@ from User.Schema.UserAdminSchema import *
 
 router = APIRouter(prefix='/userAdminApi')
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 @router.post("/addTeacher", response_model=TeacherOperation)
 async def addTeacher(teacher: AddTeacher, session: AsyncSession = Depends(get_async_session)):
-    # Check for duplicate username or email
+    # چک ایمیل تکراری اضافه شد
+    email_query = await session.execute(
+        select(Teacher).where(Teacher.email == teacher.email)
+    )
+    existing_email = email_query.scalars().first()
+
+    if existing_email:
+        raise HTTPException(status_code=400, detail="ایمیل تکراری است")
 
     teacher_query = await session.execute(
         select(Teacher).where(Teacher.username == teacher.username)
