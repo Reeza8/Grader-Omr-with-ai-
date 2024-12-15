@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse, FileResponse
 from starlette.datastructures import FormData
 from utils import correction
 from User.models import User, Student
+import json
 
 router = APIRouter(prefix='/examApi')
 
@@ -118,6 +119,8 @@ async def getExams(teacher_id: int,queryString: Optional[str] = Query(None),sess
         if exam.hasKey:
             exam.questionNumber = len(exam.key)
         exams.append(exam)
+
+    print("Exams Response:", json.dumps([exam.__dict__ for exam in exams], default=str))
 
     return exams
 
