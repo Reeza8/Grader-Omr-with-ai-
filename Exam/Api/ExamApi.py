@@ -14,29 +14,28 @@ import json
 
 router = APIRouter(prefix='/examApi')
 
-
 @router.post("/addExam", response_model=GetExams)
 async def addExam(exam: ExamCreate, session: AsyncSession = Depends(get_async_session)):
-    # Query to check for duplicate exam
+    # Check for duplicate exam
     exam_query = await session.execute(select(Exam).where(Exam.name == exam.name, Exam.teacher_id == exam.teacher_id))
     existing_exam = exam_query.scalars().first()
 
     if existing_exam:
         raise HTTPException(status_code=400, detail="نام آزمون تکراری است")
 
-    # Create the new exam
     new_exam = Exam(**exam.dict())
     session.add(new_exam)
     await session.commit()
     await session.refresh(new_exam)
+
+    # Log output
+    print("AddExam Response:", GetExams.from_orm(new_exam).dict())
+
     return new_exam
-
-
-
 
 @router.get("/getExam/{exam_id}", response_model=GetExamDetail)
 async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_session)):
-    # ترکیب کوئری‌های مرتبط با آزمون، تعداد سوالات و تعداد دانش‌آموزان
+    # Get exam and student count
     exam_query = await session.execute(
         select(
             Exam,
@@ -51,11 +50,9 @@ async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_sessio
         raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
     exam, student_count = exam_result
-
-    # تعیین تعداد سوالات
     question_count = len(exam.key) if exam.hasKey else 0
 
-    # دریافت جزئیات دانش‌آموزان
+    # Get student details
     student_details_query = await session.execute(
         select(
             Student_Exam.student_id,
@@ -83,7 +80,6 @@ async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_sessio
         for detail in student_details_query
     ]
 
-    # ساخت پاسخ نهایی
     response = GetExamDetail(
         id=exam.id,
         name=exam.name,
@@ -95,8 +91,10 @@ async def getExam(exam_id: int, session: AsyncSession = Depends(get_async_sessio
         students=student_details,
     )
 
-    return response
+    # Log output
+    print("GetExam Response:", json.dumps(response.dict(), ensure_ascii=False, default=str))
 
+    return response
 
 @router.get("/getExams/{teacher_id}", response_model=List[GetExams])
 async def getExams(teacher_id: int,queryString: Optional[str] = Query(None),session: AsyncSession = Depends(get_async_session)):
@@ -120,13 +118,15 @@ async def getExams(teacher_id: int,queryString: Optional[str] = Query(None),sess
             exam.questionNumber = len(exam.key)
         exams.append(exam)
 
-    print("Exams Response:", json.dumps([exam.__dict__ for exam in exams], default=str))
+    # Log output
+    print("GetExams Response:",
+          json.dumps([GetExams.from_orm(exam).dict() for exam in exams], ensure_ascii=False, default=str))
 
     return exams
 
 @router.put("/editExam/", response_model=GetExams)
 async def editExam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_async_session)):
-    # Query to check if the exam with the given ID exists
+    # Check if exam exists
     exam_query = await session.execute(
         select(Exam)
         .where(Exam.id == exam_update.id)
@@ -135,7 +135,7 @@ async def editExam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_
     if not exam:
         raise HTTPException(status_code=404, detail="ازمون یافت نشد")
 
-    # Query to check if an exam with the same name and teacher_id exists, excluding the current exam ID
+    # Check for duplicate name
     duplicate_query = await session.execute(select(Exam)
                                             .where(Exam.name == exam_update.name, Exam.teacher_id == exam.teacher_id,
                                                    Exam.id != exam_update.id))
@@ -149,8 +149,11 @@ async def editExam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_
 
     await session.commit()
     await session.refresh(exam)
-    return exam
 
+    # Log output
+    print("AddExam Response:", GetExams.from_orm(exam).dict())
+
+    return exam
 
 @router.delete("/deleteExam/{exam_id}")
 async def deleteExam(exam_id: int, session: AsyncSession = Depends(get_async_session)):
@@ -161,12 +164,15 @@ async def deleteExam(exam_id: int, session: AsyncSession = Depends(get_async_ses
 
     await session.delete(exam)
     await session.commit()
-    return {"detail": "ازمون با موفقیت حذف شد"}
 
+    # Log output
+    print("DeleteExam Response:", {"exam_id": exam_id, "detail": "ازمون با موفقیت حذف شد"})
+
+    return {"detail": "ازمون با موفقیت حذف شد"}
 
 @router.get('/correctSheet/')
 async def correct(request: Request, session: AsyncSession = Depends(get_async_session)):
-    # خواندن داده‌های ورودی
+    # Read input data
     data = await request.form()
     if not data:
         raise HTTPException(status_code=400, detail="درخواست خالی می‌باشد")
@@ -174,7 +180,7 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     data = FormData(data)
     data = CorrectSchema(**data)
 
-    # جستجوی آزمون
+    # Get exam
     exam_query = await session.execute(
         select(Exam).where(Exam.id == data.exam_id, Exam.teacher_id == data.teacher_id)
     )
@@ -190,16 +196,14 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     except Exception as e:
         raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
 
-    # محاسبه تعداد سوالات بدون پاسخ
     empty = len(exam.key) - (correct + incorrect)
 
-    # جستجوی دانش‌آموز
+    # Get or create student
     student_query = await session.execute(
         select(Student).where(Student.studentCode == codes, Student.teacher_id == data.teacher_id)
     )
     student = student_query.scalar_one_or_none()
 
-    # ایجاد دانش‌آموز جدید در صورت عدم وجود
     if not student:
         student = Student(
             studentCode=codes,
@@ -210,13 +214,11 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         await session.commit()
         await session.refresh(student)
 
-    # جستجوی رکورد دانش‌آموز در آزمون
     student_exam_query = await session.execute(
         select(Student_Exam).where(Student_Exam.exam_id == data.exam_id, Student_Exam.student_id == student.id)
     )
     existing_student_exam = student_exam_query.scalar_one_or_none()
 
-    # به‌روزرسانی یا ایجاد رکورد دانش‌آموز در آزمون
     if existing_student_exam:
         existing_student_exam.score = score
         existing_student_exam.correct = correct
@@ -237,7 +239,17 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         await session.commit()
         await session.refresh(new_student_exam)
 
-    # پاسخ نهایی
+    # Log output
+    print("CorrectSheet Response:", {
+        "exam_id": data.exam_id,
+        "student_id":student.id,
+        "code": codes,
+        "score": score,
+        "correct": correct,
+        "incorrect": incorrect,
+        "empty": empty
+    })
+
     return JSONResponse(
         {
             "code": codes,
@@ -263,7 +275,6 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
         key = correction.scanKey(file_bytes)
     except Exception as e:
         raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
-
 
     # جستجوی آزمون
     exam_query = await session.execute(
@@ -298,12 +309,14 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
             ))
 
     await session.commit()
+
+    print("AddExam Response:", GetExamKey.from_orm(exam).dict())
     return GetExamKey.from_orm(exam)
 
 
 @router.get("/download")
 async def download_exam():
-    pdf_path = "exam sheet.pdf"  # مسیر فایل PDF
+    pdf_path = "exam sheet.pdf"
     try:
         return FileResponse(pdf_path, media_type='application/pdf', filename="برگه ازمون.pdf")
     except Exception as e:

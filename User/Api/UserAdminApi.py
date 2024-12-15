@@ -47,7 +47,7 @@ async def addTeacher(teacher: AddTeacher, session: AsyncSession = Depends(get_as
     await session.commit()
     await session.refresh(new_teacher)
     new_teacher.password = teacher.password
-
+    print("AddTeacher Response:", TeacherOperation.from_orm(new_teacher).dict())
     return new_teacher
 
 @router.post("/login", response_model=LoginResponse)
@@ -66,14 +66,15 @@ async def login(loginData: LoginRequest, session: AsyncSession = Depends(get_asy
         raise HTTPException(status_code=401, detail="رمز عبور اشتباه است")
 
     # Create a mock token (replace with a real JWT implementation)
-
+    response = LoginResponse.from_orm(teacher).dict()
+    print("Login Response:", response)
     return teacher
 
 
 @router.put("/editStudent/", response_model=GetUser)
 async def editStudent(data: EditStudent, session: AsyncSession = Depends(get_async_session)):
     student_query = await session.execute(
-        select(Student).where(Student.id == data.id)  # اصلاح شده: ارجاع درست به مدل Student
+        select(Student).where(Student.id == data.id)
     )
     student = student_query.scalars().first()
     if not student:
@@ -92,4 +93,8 @@ async def editStudent(data: EditStudent, session: AsyncSession = Depends(get_asy
     await session.refresh(user)
 
     student.name = data.name
+
+    response = GetUser.from_orm(student).dict()
+    print("EditStudent Response:", response)
+
     return student

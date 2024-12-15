@@ -20,16 +20,21 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
+
 class LoginResponse(BaseModel):
     id : int
     username: str
     # password: str
+    class Config:
+        from_attributes = True
 
 class GetUser(BaseModel):
     id: int
     name : str
     studentCode : str
     teacher_id : int
+    class Config:
+        from_attributes = True
 
 class EditStudent(BaseModel):
     id: int

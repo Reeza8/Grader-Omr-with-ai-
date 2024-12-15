@@ -2,7 +2,7 @@ from utils.common import *
 from utils.extractCode import *
 
 heightImg, widthImg = 1500, 1000
-emptyChoiceThreshold = 5800
+emptyChoiceThreshold = 7300
 questions, choices = 10, 4
 
 def getScore(answerBoxes, img, answers):
@@ -21,7 +21,7 @@ def getScore(answerBoxes, img, answers):
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 10)
+        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 51, 10)
 
         # Black out the border regions
         margin = 20
@@ -152,7 +152,7 @@ def scanKey(byteImage):
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 10)
+        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 51, 10)
 
         # Black out the border regions
         margin = 20
@@ -163,17 +163,14 @@ def scanKey(byteImage):
 
         # Split the thresholded image into individual boxes
         boxes = splitBoxes(imgThresh)
-
         # Count non-zero pixels in each box
         myPixelVal = np.array([cv2.countNonZero(box) for box in boxes]).reshape(questions, choices)
         # Determine user answers based on the maximum pixel count in each row
         # max_indices = np.argmax(myPixelVal, axis=1) + 1  # Indices of the max pixel counts (1-based)
         # myIndex = np.where(np.max(myPixelVal, axis=1) < emptyChoiceThreshold, -1, max_indices)
-
         for row in myPixelVal:
             # Find indices of options that exceed the threshold
             filled_indices = np.where(row > emptyChoiceThreshold)[0]
-
             if len(filled_indices) == 1:  # اگر فقط یک گزینه پر شده باشد
                 myIndex.append(int(filled_indices[0] + 1))  # ذخیره ایندکس (۱-بیس)
                 consecutiveInvalidCouunt = 0
@@ -184,5 +181,4 @@ def scanKey(byteImage):
                     myIndex = myIndex[:-(consecutiveInvalidCouunt)]
                     return myIndex
 
-        # Store the answers
     return myIndex
