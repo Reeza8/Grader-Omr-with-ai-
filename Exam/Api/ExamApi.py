@@ -151,7 +151,7 @@ async def editExam(exam_update: ExamUpdate, session: AsyncSession = Depends(get_
     await session.refresh(exam)
 
     # Log output
-    print("AddExam Response:", GetExams.from_orm(exam).dict())
+    print("editExam Response:", GetExams.from_orm(exam).dict())
 
     return exam
 
@@ -194,7 +194,8 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         file_bytes = await data.img.read()
         score, correct, incorrect, codes = correction.scan(file_bytes, exam.key)
     except Exception as e:
-        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
+        print(str(e))
+        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ" )
 
     empty = len(exam.key) - (correct + incorrect)
 
@@ -274,7 +275,8 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
         file_bytes = await data.img.read()
         key = correction.scanKey(file_bytes)
     except Exception as e:
-        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ", message=str(e) )
+        print(str(e))
+        raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ")
 
     # جستجوی آزمون
     exam_query = await session.execute(
@@ -310,7 +312,7 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
 
     await session.commit()
 
-    print("AddExam Response:", GetExamKey.from_orm(exam).dict())
+    print("uploadKey Response:", GetExamKey.from_orm(exam).dict())
     return GetExamKey.from_orm(exam)
 
 

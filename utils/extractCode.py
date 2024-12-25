@@ -54,6 +54,9 @@ def getCode(images):
         image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel, iterations=8)
 
         num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(image)
+        if num_labels <= 1:
+            print(f"No valid connected components found in image {i}. Skipping.")
+            continue
         largest_label = 1 + np.argmax(stats[1:, cv2.CC_STAT_AREA])
         x, y, w, h = stats[largest_label, cv2.CC_STAT_LEFT], stats[largest_label, cv2.CC_STAT_TOP], stats[
             largest_label, cv2.CC_STAT_WIDTH], stats[largest_label, cv2.CC_STAT_HEIGHT]

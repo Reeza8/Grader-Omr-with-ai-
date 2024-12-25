@@ -2,7 +2,7 @@ from utils.common import *
 from utils.extractCode import *
 
 heightImg, widthImg = 1500, 1000
-emptyChoiceThreshold = 7300
+emptyChoiceThreshold = 8400
 questions, choices = 10, 4
 
 def getScore(answerBoxes, img, answers):
@@ -21,7 +21,7 @@ def getScore(answerBoxes, img, answers):
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 51, 10)
+        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 10)
 
         # Black out the border regions
         margin = 20
@@ -152,7 +152,7 @@ def scanKey(byteImage):
         matrix = cv2.getPerspectiveTransform(pts1, pts2)
         imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
         imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 51, 10)
+        imgThresh = cv2.adaptiveThreshold(imgWarpGray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 101, 10)
 
         # Black out the border regions
         margin = 20
