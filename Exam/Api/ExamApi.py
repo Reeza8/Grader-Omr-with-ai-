@@ -11,8 +11,15 @@ from starlette.datastructures import FormData
 from utils import correction
 from User.models import User, Student
 import json
+import os
+
+
 
 router = APIRouter(prefix='/examApi')
+
+ERROR_IMAGES_DIR = "error_images"
+os.makedirs(ERROR_IMAGES_DIR, exist_ok=True)
+
 
 @router.post("/addExam", response_model=GetExams)
 async def addExam(exam: ExamCreate, session: AsyncSession = Depends(get_async_session)):
@@ -195,6 +202,10 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         score, correct, incorrect, codes = correction.scan(file_bytes, exam.key)
     except Exception as e:
         print(str(e))
+        error_image_path = os.path.join(ERROR_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
+        with open(error_image_path, "wb") as f:
+            f.write(file_bytes)
+        print(f"-----------Error image saved to {error_image_path}")
         raise HTTPException(status_code=400, detail="خطا در پردازش پاسخ‌برگ" )
 
     empty = len(exam.key) - (correct + incorrect)
@@ -324,3 +335,9 @@ async def download_exam():
     except Exception as e:
         raise HTTPException(status_code=400, detail="امکان دانلود پاسخبرگ نیست", message=str(e))
 
+@router.get('/downloadErrorImage/{image_name}')
+async def download_error_image(image_name: str):
+    file_path = os.path.join(ERROR_IMAGES_DIR, image_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="تصویر موردنظر یافت نشد")
+    return FileResponse(file_path, media_type='image/jpeg', filename=image_name)

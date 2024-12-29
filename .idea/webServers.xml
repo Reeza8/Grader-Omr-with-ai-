@@ -10,7 +10,7 @@
         </fileTransfer>
       </webServer>
       <webServer id="3278d025-de94-4c1c-996a-ecf51cf1ba2f" name="app12">
-        <fileTransfer rootFolder="/home/develop" accessType="SFTP" host="77.238.108.86" port="22" sshConfigId="66fc0a02-33eb-4952-a268-8ffa85803b5f" sshConfig="develop@77.238.108.86:22 password">
+        <fileTransfer rootFolder="/home/develop/develop" accessType="SFTP" host="31.214.171.196" port="2225" sshConfigId="66fc0a02-33eb-4952-a268-8ffa85803b5f" sshConfig="develop@31.214.171.196:2225 password">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
