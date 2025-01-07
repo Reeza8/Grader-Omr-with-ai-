@@ -91,11 +91,11 @@ def myCut(img):
 def rectContour2(contours, img, justKey=False):
     large_rects = []
     small_rects = []
-    c=0
+    # c=0
     x_threshold = 50  # Threshold to group contours into columns
-    large_area_threshold = 900
-    img2=img.copy()
-    img1=img.copy()
+    # large_area_threshold = 900
+    # img2=img.copy()
+    # img1=img.copy()
     # Classify contours based on area and shape (rectangular)
     for contour in contours:
         area = cv2.contourArea(contour)
@@ -108,14 +108,14 @@ def rectContour2(contours, img, justKey=False):
 
 
 
-        if 0.5 <= aspect_ratio <= 0.68 and area >= 200:
+        if 0.5 <= aspect_ratio <= 0.68 and area >= 750:
             # cv2.drawContours(img2, contour, -1, (0, 0, 255), 1)
             # cv2.imwrite('img2.jpg', img2)
             large_rects.append(contour)
             if len(large_rects) == 16 and justKey == True:
                 break
 
-        if 0.7 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 800:
+        if 0.66 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 800:
                 small_rects.append(contour)
 
 

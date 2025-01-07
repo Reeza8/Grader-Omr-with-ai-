@@ -87,7 +87,7 @@ def getCodeBox(codeBoxes,img):
                                                  cv2.THRESH_BINARY_INV, 51, 5)
         # Black out the border regions
         rightMargin = 35
-        topMargin = 80
+        topMargin = 30
 
         imgThresh[:topMargin, :] = 0
         imgThresh[-topMargin:, :] = 0
