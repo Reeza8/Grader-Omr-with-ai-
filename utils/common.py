@@ -52,7 +52,7 @@ def reorder(myPoints):
 
 def getCornerPoints(cont):
     peri = cv2.arcLength(cont, True) # LENGTH OF CONTOUR
-    approx = cv2.approxPolyDP(cont, 0.05 * peri, True) # APPROXIMATE THE POLY TO GET CORNER POINTS
+    approx = cv2.approxPolyDP(cont, 0.02 * peri, True) # APPROXIMATE THE POLY TO GET CORNER POINTS
     return approx
 
 def splitBoxes(img):
