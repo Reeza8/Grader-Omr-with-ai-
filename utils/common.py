@@ -98,7 +98,7 @@ def rectContour2(contours, img, justKey=False):
             if len(large_rects) == 16 and justKey == True:
                 break
 
-        if 0.66 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 180 <= area <= 800:
+        if 0.66 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 650 <= bounding_area <= 1300:
                 small_rects.append(contour)
 
 
