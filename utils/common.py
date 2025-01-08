@@ -69,25 +69,6 @@ def splitBoxes(img):
 
     return boxes
 
-def myCut(img):
-    left = 135
-    top = 1015
-    right = 475
-    bottom = 1070
-
-    nextChoice = 74
-    choiceLeft = 45
-    choiceTop = 3
-    choiceRight = 110
-    choiceBottom = 48
-    # cropped_img = img.crop((left, top, right, bottom))
-    for i in range(4):
-        # cropped1_img = cropped_img.crop((left, top, right, bottom))
-        copyImg = img.copy()
-        copyImg=copyImg[left:right , top:bottom]
-        right = right + nextChoice
-        copyImg.save(f"./{i}.jpg")
-
 def rectContour2(contours, img, justKey=False):
     large_rects = []
     small_rects = []
@@ -103,12 +84,14 @@ def rectContour2(contours, img, justKey=False):
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 1)
         # cv2.imwrite('img1.jpg', img1)
         aspect_ratio = float(w) / h
+        bounding_area = w * h
+
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 5)
         # cv2.imwrite('img1.jpg', img1)
 
 
 
-        if 0.5 <= aspect_ratio <= 0.68 and area >= 750:
+        if 0.5 <= aspect_ratio <= 0.68 and bounding_area >= 3500:
             # cv2.drawContours(img2, contour, -1, (0, 0, 255), 1)
             # cv2.imwrite('img2.jpg', img2)
             large_rects.append(contour)
