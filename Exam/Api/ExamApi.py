@@ -272,7 +272,6 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
         }
     )
 
-
 @router.post('/uploadKey/')
 async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_session)):
     # خواندن داده‌های ورودی
@@ -293,6 +292,7 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
     exam_query = await session.execute(
         select(Exam).where(Exam.id == data.exam_id, Exam.teacher_id == data.teacher_id)
     )
+
     exam = exam_query.scalar_one_or_none()
     if not exam:
         raise HTTPException(status_code=404, detail="آزمون یافت نشد")
@@ -325,7 +325,6 @@ async def uploadKey(request: Request, session: AsyncSession = Depends(get_async_
 
     print("uploadKey Response:", GetExamKey.from_orm(exam).dict())
     return GetExamKey.from_orm(exam)
-
 
 @router.get("/download")
 async def download_exam():

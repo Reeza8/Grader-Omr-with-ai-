@@ -2,14 +2,6 @@ import cv2
 import numpy as np
 
 
-def getRectangleCenter(points):
-    # محاسبه مرکز مستطیل
-    x_coords = [p[0] for p in points]  # اصلاح
-    y_coords = [p[1] for p in points]  # اصلاح
-    center_x = sum(x_coords) // len(x_coords)
-    center_y = sum(y_coords) // len(y_coords)
-    return (center_x, center_y)
-
 def reorder(myPoints):
     try:
         myPoints = myPoints.reshape((4, 2)) # REMOVE EXTRA BRACKET
@@ -49,7 +41,6 @@ def reorder(myPoints):
         ordered_points = np.array([left_points[0], right_points[0], left_points[1], right_points[1]], dtype=np.float32)
         return ordered_points
 
-
 def getCornerPoints(cont):
     peri = cv2.arcLength(cont, True) # LENGTH OF CONTOUR
     approx = cv2.approxPolyDP(cont, 0.02 * peri, True) # APPROXIMATE THE POLY TO GET CORNER POINTS
@@ -79,7 +70,7 @@ def rectContour2(contours, img, justKey=False):
     # img1=img.copy()
     # Classify contours based on area and shape (rectangular)
     for contour in contours:
-        area = cv2.contourArea(contour)
+        # area = cv2.contourArea(contour)
         x, y, w, h = cv2.boundingRect(contour)
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 1)
         # cv2.imwrite('img1.jpg', img1)
@@ -88,9 +79,6 @@ def rectContour2(contours, img, justKey=False):
 
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 5)
         # cv2.imwrite('img1.jpg', img1)
-
-
-
         if 0.5 <= aspect_ratio <= 0.68 and bounding_area >= 3500:
             # cv2.drawContours(img2, contour, -1, (0, 0, 255), 1)
             # cv2.imwrite('img2.jpg', img2)
