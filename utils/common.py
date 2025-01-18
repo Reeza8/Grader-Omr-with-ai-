@@ -79,14 +79,14 @@ def rectContour2(contours, img, justKey=False):
 
         # cv2.drawContours(img1, contour, -1, (0, 255, 0), 5)
         # cv2.imwrite('img1.jpg', img1)
-        if 0.5 <= aspect_ratio <= 0.68 and bounding_area >= 3500:
+        if 0.5 <= aspect_ratio <= 0.68 and bounding_area >= 12000:
             # cv2.drawContours(img2, contour, -1, (0, 0, 255), 1)
             # cv2.imwrite('img2.jpg', img2)
             large_rects.append(contour)
             if len(large_rects) == 16 and justKey == True:
                 break
 
-        if 0.66 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 650 <= bounding_area <= 1300:
+        if 0.66 <= aspect_ratio <= 0.9 and y + h / 4 < img.shape[0] / 4 and 650 <= bounding_area <= 1200:
                 small_rects.append(contour)
 
 
