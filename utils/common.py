@@ -141,5 +141,6 @@ def rectContour2(contours, img, justKey=False):
 
     # cv2.imwrite('img1.jpg', img1)
     # print(len(large_rects_sorted),len(small_rects) )
+
     return large_rects_sorted, small_rects
 
