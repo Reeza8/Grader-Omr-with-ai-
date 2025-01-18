@@ -101,7 +101,7 @@ def getCodeBox(codeBoxes,img):
 def scan(byteImage, answers):
     np_arr = np.frombuffer(byteImage, np.uint8)
     img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-    img=img[650:, :]
+    img=img[600:, :]
     img = cv2.resize(img, (widthImg, heightImg)) # Resize the image
     imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
     imgGray = cv2.GaussianBlur(imgGray, (3, 3), 2)  # Apply Gaussian blur
