@@ -202,8 +202,8 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     try:
         file_bytes = await data.img.read()
         score, correct, incorrect, codes = correction.scan(file_bytes, exam.key)
-        error_image_path = os.path.join(SUCCES_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
-        with open(error_image_path, "wb") as f:
+        succes_image_path = os.path.join(SUCCES_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
+        with open(succes_image_path, "wb") as f:
             f.write(file_bytes)
         print(f"-----------succesfullImage {SUCCES_IMAGES_DIR}")
     except Exception as e:
