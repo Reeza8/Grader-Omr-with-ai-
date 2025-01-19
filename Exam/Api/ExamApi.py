@@ -347,3 +347,10 @@ async def download_error_image(image_name: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="تصویر موردنظر یافت نشد")
     return FileResponse(file_path, media_type='image/jpeg', filename=image_name)
+
+@router.get('/downloadSuccessImage/{image_name}')
+async def download_success_image(image_name: str):
+    file_path = os.path.join(SUCCESS_IMAGES_DIR, image_name)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="تصویر موردنظر یافت نشد")
+    return FileResponse(file_path, media_type='image/jpeg', filename=image_name)
