@@ -18,9 +18,10 @@ import os
 router = APIRouter(prefix='/examApi')
 
 ERROR_IMAGES_DIR = "error_images"
-SUCCES_IMAGES_DIR = "succes_images"
+SUCCESS_IMAGES_DIR = "success_images"
 
 os.makedirs(ERROR_IMAGES_DIR, exist_ok=True)
+os.makedirs(SUCCESS_IMAGES_DIR, exist_ok=True)
 
 
 @router.post("/addExam", response_model=GetExams)
@@ -202,10 +203,10 @@ async def correct(request: Request, session: AsyncSession = Depends(get_async_se
     try:
         file_bytes = await data.img.read()
         score, correct, incorrect, codes = correction.scan(file_bytes, exam.key)
-        succes_image_path = os.path.join(SUCCES_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
-        with open(succes_image_path, "wb") as f:
+        success_image_path = os.path.join(SUCCESS_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
+        with open(success_image_path, "wb") as f:
             f.write(file_bytes)
-        print(f"-----------succesfullImage {SUCCES_IMAGES_DIR}")
+        print(f"-----------Success image saved to {success_image_path}")
     except Exception as e:
         print(str(e))
         error_image_path = os.path.join(ERROR_IMAGES_DIR, f"exam_{data.exam_id}.jpg")
