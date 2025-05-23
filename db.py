@@ -2,17 +2,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from utils.config import settings
 
-DATABASE_URL = "postgresql+asyncpg://root:4C5pt5Lnpae3Ewjw3bPVoYAZ@mydatabase:5432/postgres"
 
-# DATABASE_URL = "sqlite+aiosqlite:///./myDb.db"
+# DATABASE_URL = "postgresql+asyncpg://root:4C5pt5Lnpae3Ewjw3bPVoYAZ@mydatabase:5432/postgres"
 
-# for alembic to alert tables
-sync_engine = create_engine("postgresql://root:4C5pt5Lnpae3Ewjw3bPVoYAZ@mydatabase:5432/postgres")
+# sync_engine = create_engine("postgresql://root:4C5pt5Lnpae3Ewjw3bPVoYAZ@mydatabase:5432/postgres")
+sync_engine = create_engine(settings.sync_engine)
+engine = create_async_engine(settings.database_url, echo=False)
 
-# sync_engine = create_engine("sqlite:///./myDb.db")
 # for application
-engine = create_async_engine(DATABASE_URL, echo=False)
 
 # Async session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine, class_=AsyncSession, expire_on_commit=False)

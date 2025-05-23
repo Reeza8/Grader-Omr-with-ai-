@@ -1,36 +1,48 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from db import Base
+import enum
 
+
+class UserRole(enum.Enum):
+    teacher = "teacher"
+    student = "student"
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=True)
+    email = Column(String(255), unique=True, nullable=True)
+    phone_number = Column(String(13), unique=True, nullable=True)
+    password_hash = Column(String, nullable=True)
+    role = Column(Enum(UserRole), nullable=False)
+    createdAt = Column(DateTime, server_default=func.now())
+
+    student = relationship("Student", back_populates="user", uselist=False, foreign_keys="Student.user_id")
+    students = relationship("Student", back_populates="teacher", foreign_keys="Student.teacher_id")
+
+
+class Student(Base):
+    __tablename__ = 'students'
+
+    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    student_code = Column(String(10), unique=True, nullable=False)
+    teacher_id = Column(Integer, ForeignKey('users.id', ondelete="SET NULL"), nullable=False)
+
+    user = relationship("User", back_populates="student", foreign_keys=[user_id])
+    teacher = relationship("User", back_populates="students", foreign_keys=[teacher_id])
+
+
+class VerifyCode(Base):
+    __tablename__ = 'verify_code'
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    createdAt = Column(DateTime(timezone=True), server_default=func.now())
-    updatedAt = Column(DateTime(timezone=True), onupdate=func.now())
+    code = Column(String(6), unique=True, nullable=False)
+    isUsed = Column(Boolean, nullable=False, default=False)
+    index = Column(String(256), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    createdAt = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-# Teacher class with foreign key to User
-class Teacher(Base):
-    __tablename__ = 'teacher'
-
-    id = Column(Integer, ForeignKey('user.id'), primary_key=True, index=True)
-    email =  Column(String, unique=True)
-    username = Column(String, unique=True, nullable=False)
-    hashedPassword = Column(String, nullable=False)
-
-    # Define a one-way relationship to User
-    user = relationship('User', foreign_keys=[id])
-
-# Student class with foreign key to Useraaa
-class Student(Base):
-    __tablename__ = 'student'
-
-    id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    studentCode = Column(String, nullable=False, index=True)
-    teacher_id = Column(Integer, ForeignKey('teacher.id'), nullable=False, index=True)
-    # Define a one-way relationship to User
-    user = relationship('User', foreign_keys=[id])
-    teacher = relationship('Teacher', foreign_keys=[teacher_id])
+    user = relationship('User', foreign_keys=[user_id])

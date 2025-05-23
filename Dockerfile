@@ -14,7 +14,7 @@ WORKDIR /app
 
 # کپی کردن و نصب وابستگی‌ها
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # مرحله دوم: ایجاد ایمیج سبک برای اجرای نهایی
 FROM python:3.12-slim AS final
@@ -39,4 +39,4 @@ COPY . .
 
 
 # فرمان اجرای اپلیکیشن
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "10"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
